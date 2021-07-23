@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "howler": "^2.2.3",
     "leaflet": "^1.7.1",
     "vue": "^2.6.11",
     "vue2-leaflet": "^2.7.1",
