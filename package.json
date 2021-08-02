@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "howler": "^2.2.3",
     "leaflet": "^1.7.1",
+    "tone": "^14.7.77",
     "vue": "^2.6.11",
     "vue2-leaflet": "^2.7.1",
     "vuetify": "^2.4.0"
@@ -35,8 +36,7 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
+      "plugin:vue/essential"
     ],
     "parserOptions": {
       "parser": "babel-eslint"

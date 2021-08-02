@@ -8,8 +8,12 @@
         :radius="radius"
         :color="color"
         :lat-lng="marker.latLong"
+        @click="playMarker(marker.note)"
       >
-        <l-tooltip>{{ marker.latLong }}</l-tooltip>
+        <l-tooltip>
+          <div>latLon: {{ marker.latLong }}</div>
+          <div>note: {{ marker.note }}</div>
+        </l-tooltip>
       </l-circle-marker>
     </l-map>
   </div>
@@ -17,6 +21,7 @@
 
 <script>
   import { LMap, LTileLayer, LCircleMarker, LTooltip } from 'vue2-leaflet';
+  import * as Tone from 'tone';
   import axios from 'axios';
 
   export default {
@@ -36,45 +41,98 @@
         zoom: 13.1,
         center: [],
         markers: [],
-        radius: 2,
+        radius: 4,
         color: 'gray',
         latMax: 38.943837,
         latMin: 38.843422,
         lonMax: -76.925315,
         lonMin: -77.179832,
-        columns: 7, // columns to represent C,D,E,F,G,A,B
-        rows: 7, // rows to represent octaves
+        notes: [
+          { note: 'G', lonValue: null },
+          { note: 'A', lonValue: null },
+          { note: 'B', lonValue: null },
+          { note: 'C', lonValue: null },
+          { note: 'D', lonValue: null },
+          { note: 'E', lonValue: null },
+          { note: 'F', lonValue: null },
+        ],
+        octaves: [
+          { octave: '1', latValue: null },
+          { octave: '2', latValue: null },
+          { octave: '3', latValue: null },
+          { octave: '4', latValue: null },
+          { octave: '5', latValue: null },
+          { octave: '6', latValue: null },
+          { octave: '7', latValue: null },
+        ],
       };
     },
     methods: {
-      zoomUpdated(zoom) {
-        this.zoom = zoom;
+      // zoomUpdated(zoom) {
+      //   this.zoom = zoom;
+      // },
+      // centerUpdated(center) {
+      //   this.center = center;
+      // },
+      // boundsUpdated(bounds) {
+      //   this.bounds = bounds;
+      // },
+      findMapCenter() {
+        const centerLat = (this.latMin + this.latMax) / 2;
+        const centerLon = (this.lonMin + this.lonMax) / 2;
+        this.center = [centerLat, centerLon];
       },
-      centerUpdated(center) {
-        this.center = center;
+      createMusicalGrid() {
+        const latGridLength = (this.latMax - this.latMin) / this.octaves.length;
+        const lonGridLength = (this.lonMax - this.lonMin) / this.notes.length;
+        let latValue = this.latMin;
+        let lonValue = this.lonMin;
+        this.notes.forEach((el) => {
+          el.lonValue = lonValue;
+          lonValue += lonGridLength;
+        });
+        this.octaves.forEach((el) => {
+          el.latValue = latValue;
+          latValue += latGridLength;
+        });
       },
-      boundsUpdated(bounds) {
-        this.bounds = bounds;
+      findNoteAndOctive(lat, lon) {
+        const lonNote = this.notes.filter((el) => el.lonValue <= lon);
+        const latOctave = this.octaves.filter((el) => el.latValue <= lat);
+        return (
+          lonNote[lonNote.length - 1]['note'] +
+          latOctave[latOctave.length - 1]['octave']
+        );
+      },
+      getandParseStationLocations() {
+        axios.get(this.stationInformation).then((data) => {
+          data.data.data.stations.forEach((el) => {
+            if (
+              el.lat >= this.latMin &&
+              el.lat <= this.latMax &&
+              el.lon >= this.lonMin &&
+              el.lon <= this.lonMax
+            ) {
+              const completeNote = this.findNoteAndOctive(el.lat, el.lon);
+              this.markers.push({
+                id: el.station_id,
+                latLong: [el.lat, el.lon],
+                note: completeNote,
+              });
+            }
+          });
+        });
+      },
+      playMarker(note) {
+        console.log(note);
+        const synth = new Tone.Synth().toDestination();
+        synth.triggerAttackRelease(note, 1);
       },
     },
     created() {
-      // find center of map
-      let centerLat = (this.latMin + this.latMax) / 2;
-      let centerLon = (this.lonMin + this.lonMax) / 2;
-      this.center = [centerLat, centerLon];
-      // get station locations
-      axios.get(this.stationInformation).then((data) => {
-        data.data.data.stations.forEach((el) => {
-          if (
-            el.lat >= this.latMin &&
-            el.lat <= this.latMax &&
-            el.lon >= this.lonMin &&
-            el.lon <= this.lonMax
-          ) {
-            this.markers.push({ id: el.station_id, latLong: [el.lat, el.lon] });
-          }
-        });
-      });
+      this.findMapCenter();
+      this.createMusicalGrid();
+      this.getandParseStationLocations();
     },
   };
 </script>
