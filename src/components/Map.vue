@@ -41,7 +41,7 @@
         zoom: 13.1,
         center: [],
         markers: [],
-        radius: 4,
+        radius: 1,
         color: 'gray',
         latMax: 38.943837,
         latMin: 38.843422,
@@ -68,15 +68,6 @@
       };
     },
     methods: {
-      // zoomUpdated(zoom) {
-      //   this.zoom = zoom;
-      // },
-      // centerUpdated(center) {
-      //   this.center = center;
-      // },
-      // boundsUpdated(bounds) {
-      //   this.bounds = bounds;
-      // },
       findMapCenter() {
         const centerLat = (this.latMin + this.latMax) / 2;
         const centerLon = (this.lonMin + this.lonMax) / 2;
