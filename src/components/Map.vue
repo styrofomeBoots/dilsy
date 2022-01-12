@@ -25,8 +25,7 @@
 
 <script>
 import { LMap, LTileLayer, LCircleMarker, LTooltip } from 'vue2-leaflet'
-import * as Tone from 'tone'
-import bikeGrid from '../static/javascript/bike-grid'
+import grid from '../modules/grid'
 
 export default {
   components: {
@@ -43,12 +42,13 @@ export default {
       center: [],
       markers: [],
       radius: 1,
-      color: 'gray'
+      color: 'gray',
+      intervalId: null
     }
   },
   methods: {},
   async created() {
-    let setup = await bikeGrid.setUp()
+    let setup = await grid.setUp()
     this.center = setup.center
     this.markers = setup.markers
     this.isDataReady = setup.isDataReady
