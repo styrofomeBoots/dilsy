@@ -5,6 +5,7 @@
 // | FROM THE BIKE SHARE API.                                                                    |
 // +=============================================================================================+
 import axios from 'axios'
+import tone from './tone'
 
 export default {
   // +=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=+
@@ -42,8 +43,6 @@ export default {
 
   stations: [],
 
-  intervalId: null,
-
   // +=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~+
   // |                                    FUNCTIONS                                     |
   // +~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=+
@@ -52,13 +51,7 @@ export default {
     const center = this.CENTER
     const markers = this.stations
     await this.setupStations()
-    this.intervalId = setInterval(
-      this.updateStations,
-      5000,
-      this.STATION_STATUS,
-      this.stations,
-      this.intervalId
-    )
+    setInterval(this.updateStations, 5000, this.STATION_STATUS, this.stations)
     const isDataReady = true
     return { center, markers, isDataReady }
   },
@@ -122,33 +115,39 @@ export default {
         note: note,
         name: station.name,
         capacity: station.capacity,
-        numBikesAvailable: status.num_bikes_available
+        numBikesAvailable: status.num_bikes_available,
+        showRipple: false
       }
       this.stations.push(stationData)
     }
   },
 
-  async updateStations(STATION_STATUS, stations, id) {
-    console.log('checking...')
-    console.log(id)
+  async sleep(max) {},
+
+  async updateStations(STATION_STATUS, stations) {
     const statusResponse = await axios.get(STATION_STATUS)
     const stationStatus = statusResponse.data.data.stations
-    let isChange = false
     for (const station of stations) {
+      station.showRipple = false
       const status = stationStatus.filter(
         status => status.station_id === station.id
       )[0]
       if (station.numBikesAvailable !== status.num_bikes_available) {
-        console.log(`Change: ${station.name}`)
-        console.log(
-          `Old Count: ${station.numBikesAvailable}; New Count ${status.num_bikes_available}`
-        )
+        const ms = Math.floor(Math.random() * 1500) + 500
+        const message =
+          station.numBikesAvailable > status.num_bikes_available
+            ? 'A bike has been returned.'
+            : 'A bike has been checked out.'
+        console.log(`UPDATE: ${station.name}`)
+        console.log(`${message} ${status.num_bikes_available} available.`)
+        console.log(`Note ${station.note} will play in ${ms.toString()} ms.`)
+        console.log('')
+
+        await new Promise(resolve => setTimeout(resolve, ms))
         station.numBikesAvailable = status.num_bikes_available
-        isChange = true
+        station.showRipple = true
+        await tone.playNote(station.note)
       }
-    }
-    if (!isChange) {
-      console.log('no change')
     }
   }
 }
