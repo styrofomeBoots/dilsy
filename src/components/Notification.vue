@@ -3,10 +3,13 @@
     <span></span>
     <v-list-item-content>
       <v-list-item-title>
-        {{ update.lineOne }}
+        {{ notification.lineOne }}
       </v-list-item-title>
       <v-list-item-subtitle>
-        {{ update.lineTwo }}
+        {{ notification.lineTwo }}
+      </v-list-item-subtitle>
+      <v-list-item-subtitle>
+        {{ notification.lineThree }}
       </v-list-item-subtitle>
     </v-list-item-content>
   </v-list-item>
@@ -14,7 +17,7 @@
 
 <script>
 export default {
-  props: ["update"],
+  props: ["notification"],
 };
 </script>
 

@@ -1,48 +1,25 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant="mini"
-      color="transparent"
-      mobile-breakpoint="0"
-      permanent
-      hide-overlay
-      disable-resize-watcher
-      floating
-      app
-    >
-      <v-list>
-        <v-list-item class="ml-n2" dark>
-          <v-btn icon @click.stop="mini = !mini">
-            <v-icon>
-              {{ mini ? "mdi-chevron-left" : "mdi-chevron-right" }}
-            </v-icon>
-          </v-btn>
-          <v-list-item-title class="text-h6">updates</v-list-item-title>
-        </v-list-item>
-        <v-list-item v-if="updates.length === 0" dark>
-          <span></span>
-          <v-list-item-title>waiting for action</v-list-item-title>
-        </v-list-item>
-        <Update
-          v-for="(update, index) in updates"
-          :key="index"
-          :update="update"
-        />
-      </v-list>
-    </v-navigation-drawer>
-    <Map />
-    <Dialog @close="closeDialog" />
-    <v-btn dark class="help-btn" small icon>
+    <NavDrawer :notifications="notifications" />
+    <Map :stations="stations" />
+    <WelcomeDialog @close="closeWelcomeDialog" />
+    <HelpDialog
+      v-if="showHelpDialog"
+      @close="showHelpDialog = false"
+      @toggleSound="toggleSoundEnabled"
+      :isSoundEnabled="isSoundEnabled"
+    />
+    <v-btn @click="showHelpDialog = true" dark class="help-btn" small icon>
       <v-icon>mdi-help-circle-outline</v-icon>
     </v-btn>
   </v-app>
 </template>
 
 <script>
+import NavDrawer from "./components/NavDrawer";
 import Map from "./components/Map";
-import Update from "./components/Update";
-import Dialog from "./components/dialog/Dialog";
+import WelcomeDialog from "./components/dialog/WelcomeDialog";
+import HelpDialog from "./components/dialog/HelpDialog";
 
 import { setupStations, getUpdates } from "./modules/stations";
 
@@ -50,55 +27,61 @@ export default {
   name: "App",
 
   components: {
+    NavDrawer,
     Map,
-    Update,
-    Dialog,
+    WelcomeDialog,
+    HelpDialog,
   },
 
   data: () => ({
-    mini: true,
-    drawer: true,
     isSoundEnabled: false,
     isRunningUpdates: false,
+    showHelpDialog: false,
     stations: [],
+    notifications: [],
     updates: [],
     updateQueue: [],
-    updateIntervalId: null,
-    firstTime: true,
+    intervalId: null,
   }),
   async created() {
     this.stations = await setupStations();
-    this.intervalId = setInterval(() => {
-      this.updateStations();
+    setInterval(async () => {
+      await this.getStationUpdates();
     }, 5000);
   },
   methods: {
-    async updateStations() {
+    async getStationUpdates() {
       const updates = await getUpdates(this.stations);
-      this.stations = updates.updatedStations;
-      this.updateQueue = this.updateQueue.concat(updates.updates);
-      if (this.firstTime) {
-        this.firstTime = false;
-        this.updateQueue = [];
+      this.updates = this.updates.concat(updates);
+      if (this.updateQueue.length === 0 && this.updates.length > 0) {
+        this.updateQueue = this.updateQueue.concat(this.updates);
+        this.updates = [];
+        await this.runUpdates();
       }
-      if (!this.isRunningUpdates && this.updateQueue.length === 0) return;
-      this.isRunningUpdates = true;
-      this.runUpdates();
     },
 
     async runUpdates() {
       for (const update of this.updateQueue) {
-        this.updates.unshift(update);
-        this.updateQueue.shift();
-        const ms = Math.floor(Math.random() * 1500) + 500;
-        await new Promise((resolve) => setTimeout(resolve, ms));
-        if (this.updateQueue.length === 0) {
-          this.isRunningUpdates = false;
+        // await playNote goes here
+        const station = this.stations.find(
+          (station) => station.id === update.id
+        );
+        station.numBikesAvailable = update.numBikesAvailable;
+        station.icon = update.icon;
+        this.notifications.unshift(update);
+        if (this.notifications.length === 50) {
+          this.notifications.pop();
         }
+        const ms = Math.floor(Math.random() * 2000) + 1000;
+        await new Promise((resolve) => setTimeout(resolve, ms));
       }
+      this.updateQueue = [];
     },
-    closeDialog(value) {
+    closeWelcomeDialog(value) {
       this.isSoundEnabled = value;
+    },
+    toggleSoundEnabled() {
+      this.isSoundEnabled = !this.isSoundEnabled;
     },
   },
 };
@@ -109,16 +92,6 @@ body,
 #app {
   width: 100%;
   height: 100%;
-}
-
-.v-navigation-drawer__content {
-  opacity: 0.4;
-  overflow-y: hidden !important;
-  mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 1) 20%,
-    transparent 100%
-  );
 }
 
 .help-btn {
