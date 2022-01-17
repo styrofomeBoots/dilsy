@@ -15,7 +15,7 @@ export default {
     Map,
   },
   mounted() {
-    this.selectCity(null)
+    this.selectCity(0)
   },
   methods: {
     ...mapActions(['selectCity']),

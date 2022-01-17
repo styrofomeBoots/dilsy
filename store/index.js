@@ -5,7 +5,7 @@ import {
 } from '../static/stations'
 
 const state = () => ({
-  isDataReady: false, // notifies map if ready to render
+  isDataReady: false, // notifies map to allow render
   isSoundEnabled: false, // has user enabled sound?
   intervalId: null, // setInterval instance
   stations: [], // all bike stations for selected city. map marker data
@@ -16,43 +16,43 @@ const state = () => ({
   // all cities with bikeshare feeds
   cities: [
     {
-      name: 'bay area',
+      name: 'bay area', // 0
       api: 'baywheels',
       zoom: 12.5,
       center: [37.790515, -122.364474],
     },
     {
-      name: 'chicago',
+      name: 'chicago', // 1
       api: 'divvybikes',
       zoom: 13.1,
       center: [41.876942, -87.629227],
     },
     {
-      name: 'columbus',
+      name: 'columbus', // 2
       api: 'cogobikeshare',
       zoom: 13.1,
       center: [39.959423, -82.999207],
     },
     {
-      name: 'washington, dc',
+      name: 'washington dc', // 3
       api: 'capitalbikeshare',
       zoom: 13.1,
       center: [38.892112, -77.036548],
     },
     {
-      name: 'minneapolis',
+      name: 'minneapolis', // 4
       api: 'niceridemn',
       zoom: 13.1,
       center: [44.969344, -93.269558],
     },
     {
-      name: 'new york city',
-      api: 'citibike',
+      name: 'new york city', // 5
+      api: 'citibikenyc',
       zoom: 13.1,
       center: [40.707783, -74.007902],
     },
     {
-      name: 'portland',
+      name: 'portland', // 6
       api: 'biketownpdx',
       mapZoom: 13.1,
       mapCenter: [45.512515, -122.679884],
@@ -73,10 +73,9 @@ const getters = {
 const actions = {
   resetCityData: ({ commit }) => commit('RESET_CITY_DATA'),
 
-  // initially called on app mount and is passed null as citySelection
-  // and passed a city name every other time.  Chooses randomly if null.
   async selectCity({ commit, state, dispatch }, selection) {
     let city = state.cities[selection]
+    // if selection is null will choose randomly
     if (!city) {
       const rando = Math.floor(Math.random() * state.cities.length - 1) + 1
       city = state.cities[rando]
