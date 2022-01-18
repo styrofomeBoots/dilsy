@@ -2,6 +2,7 @@
   <l-marker :lat-lng="station.latLon" :icon="station.icon">
     <l-tooltip>
       <div>latLon: {{ station.latLon }}</div>
+      <div>latLon: {{ station.note }}{{ station.octave }}</div>
     </l-tooltip>
   </l-marker>
 </template>

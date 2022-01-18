@@ -1,8 +1,5 @@
-import {
-  setupStations,
-  getUpdates,
-  isDuplicateUpdate,
-} from '../static/stations'
+import { playTone } from '../static/tone'
+import { setupStations, getUpdates, isDuplicateUpdate } from '~/static/stations'
 
 const state = () => ({
   isDataReady: false, // notifies map to allow render
@@ -14,6 +11,10 @@ const state = () => ({
   updateQueue: [], // queued updates to be added to updates[] when it is finished running
   selectedCity: {}, // user selected city.  loads as dc
   // all cities with bikeshare feeds
+  sortAlgs: ['location', 'count'],
+  selectedSortAlg: 'count',
+  scales: ['major', 'pentatonic'],
+  selectedScale: 'pentatonic',
   cities: [
     {
       name: 'bay area', // 0
@@ -82,13 +83,17 @@ const actions = {
     }
     commit('RESET_CITY_DATA')
     commit('SELECT_CITY', city)
-    const stations = await setupStations(state.selectedCity.api)
+    const stations = await setupStations(
+      state.selectedCity.api,
+      state.selectedSortAlg,
+      state.selectedScale
+    )
     commit('SET_STATIONS', stations)
     commit(
       'SET_INTERVAL',
       setInterval(async () => {
         await dispatch('updateStations')
-      }, 5000)
+      }, 2000)
     )
   },
 
@@ -107,8 +112,9 @@ const actions = {
       // temp solution to fix repeating recent notifications
       if (isDuplicateUpdate(update, state.notifications)) continue
       // ---------------------------------------------------------
+      await playTone(update)
       commit('RUN_UPDATE', update)
-      const ms = Math.floor(Math.random() * 2000) + 1000
+      const ms = Math.floor(Math.random() * 3000) + 500
       await new Promise((resolve) => setTimeout(resolve, ms))
     }
     commit('RESET_UPDATES')
@@ -117,7 +123,7 @@ const actions = {
 
 const mutations = {
   RESET_CITY_DATA(state) {
-    clearInterval(state.ntervalId)
+    clearInterval(state.intervalId)
     state.isDataReady = false
     state.selectedCity = null
     state.stations = []
@@ -141,6 +147,7 @@ const mutations = {
   RUN_UPDATE: (state, update) => {
     const station = state.stations.find((station) => station.id === update.id)
     station.numBikesAvailable = update.numBikesAvailable
+    station.lastUpdate = update.currentUpdate
     station.icon = update.icon
     state.notifications.unshift(update)
     if (state.notifications.length === 50) state.notifications.pop()

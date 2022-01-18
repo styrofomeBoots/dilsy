@@ -1,5 +1,6 @@
 import L from 'leaflet'
 import { getStationInfo, getStationStatus } from './api'
+import { setupStationGrid } from './grid'
 
 const RETURN_MSG = 'bike returned to station'
 const CHECKOUT_MSG = 'bike checked out from station'
@@ -18,7 +19,7 @@ function setIcon(isUpdate) {
   })
 }
 
-export async function setupStations(city) {
+export async function setupStations(city, sortAlg, scale) {
   const stationInfo = await getStationInfo(city)
   const stationStatus = await getStationStatus(city)
   const stationData = stationInfo.map((station) => {
@@ -28,13 +29,21 @@ export async function setupStations(city) {
     return {
       id: station.station_id,
       name: station.name.toLowerCase(),
+      lat: station.lat,
+      lon: station.lon,
       latLon: [station.lat, station.lon],
+      note: '',
+      octave: null,
       capacity: station.capacity,
+      lastUpdate: status.last_reported,
+      currentUpdate: status.last_reported,
       numBikesAvailable: status.num_bikes_available,
       icon: setIcon(false),
     }
   })
-  return stationData
+
+  const stations = setupStationGrid(stationData, sortAlg, scale)
+  return stations
 }
 
 export async function getUpdates(city, stations) {
@@ -52,6 +61,9 @@ export async function getUpdates(city, stations) {
         lineTwo: `${message}`,
         lineThree: `${status.num_bikes_available}/${station.capacity} bikes available`,
         numBikesAvailable: status.num_bikes_available,
+        currentUpdate: status.last_reported,
+        note: station.note,
+        octave: station.octave,
         id: station.id,
         icon: setIcon(true),
       }
@@ -71,7 +83,7 @@ export async function getUpdates(city, stations) {
 //     updates.pop()
 export function isDuplicateUpdate(update, notifications) {
   const recentNotifications = notifications.slice(0, 15)
-  const isDuplicate = recentNotifications.find(
+  const isDuplicate = recentNotifications.some(
     (x) =>
       x.id === update.id && x.numBikesAvailable === update.numBikesAvailable
   )
