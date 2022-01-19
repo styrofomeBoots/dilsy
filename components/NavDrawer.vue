@@ -35,9 +35,8 @@
     <template #append>
       <v-list-item class="ml-n2 help-button">
         <v-btn icon small>
-          <v-icon small>mdi-help</v-icon>
+          <v-icon small>mdi-cog</v-icon>
         </v-btn>
-        <v-list-item-subtitle>what</v-list-item-subtitle>
       </v-list-item>
     </template>
   </v-navigation-drawer>
@@ -47,9 +46,7 @@
 import { mapGetters } from 'vuex'
 import Notification from './navDrawer/Notification'
 export default {
-  components: {
-    Notification,
-  },
+  components: { Notification },
   data: () => ({
     mini: true,
     drawer: true,

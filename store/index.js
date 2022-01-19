@@ -2,6 +2,7 @@ import { playTone } from '../static/tone'
 import { setupStations, getUpdates, isDuplicateUpdate } from '~/static/stations'
 
 const state = () => ({
+  showSettingsDialog: true,
   isDataReady: false, // notifies map to allow render
   isSoundEnabled: false, // has user enabled sound?
   intervalId: null, // setInterval instance
@@ -112,9 +113,9 @@ const actions = {
       // temp solution to fix repeating recent notifications
       if (isDuplicateUpdate(update, state.notifications)) continue
       // ---------------------------------------------------------
-      await playTone(update)
+      if (state.isSoundEnabled) await playTone(update)
       commit('RUN_UPDATE', update)
-      const ms = Math.floor(Math.random() * 3000) + 500
+      const ms = Math.floor(Math.random() * 2500) + 500
       await new Promise((resolve) => setTimeout(resolve, ms))
     }
     commit('RESET_UPDATES')

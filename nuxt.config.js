@@ -9,8 +9,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - scrella',
-    title: 'scrella',
+    titleTemplate: '%s - rita',
+    title: 'rita',
     htmlAttrs: {
       lang: 'en',
     },
