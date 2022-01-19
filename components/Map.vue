@@ -32,7 +32,6 @@ export default {
   },
   data: () => ({
     // leafletLogo: require('@/assets/imgs/leaflet.svg'),
-    // githubLogo: require('@/assets/imgs/github.svg'),
     mapUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
   }),
   computed: {

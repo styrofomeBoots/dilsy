@@ -4,8 +4,11 @@ import { setupStations, getUpdates, isDuplicateUpdate } from '~/static/stations'
 const state = () => ({
   showSettingsDialog: true,
   isDataReady: false, // notifies map to allow render
-  isSoundEnabled: false, // has user enabled sound?
-  intervalId: null, // setInterval instance
+  isSoundEnabled: true, // has user enabled sound?
+  intervalId: null,
+  intervalRunTime: 4000,
+  promiseTimeMin: 500,
+  promiseTimeMax: 3500,
   stations: [], // all bike stations for selected city. map marker data
   notifications: [], // shows in nav drawer.  most recent first
   updates: [], // updates that are current running
@@ -50,7 +53,7 @@ const state = () => ({
     {
       name: 'new york city', // 5
       api: 'citibikenyc',
-      zoom: 13.1,
+      zoom: 12.4,
       center: [40.707783, -74.007902],
     },
     {
@@ -94,7 +97,7 @@ const actions = {
       'SET_INTERVAL',
       setInterval(async () => {
         await dispatch('updateStations')
-      }, 2000)
+      }, state.intervalRunTime)
     )
   },
 
@@ -115,7 +118,8 @@ const actions = {
       // ---------------------------------------------------------
       if (state.isSoundEnabled) await playTone(update)
       commit('RUN_UPDATE', update)
-      const ms = Math.floor(Math.random() * 2500) + 500
+      const ms =
+        Math.floor(Math.random() * state.promiseTimeMax) + state.promiseTimeMin
       await new Promise((resolve) => setTimeout(resolve, ms))
     }
     commit('RESET_UPDATES')

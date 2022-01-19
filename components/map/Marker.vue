@@ -32,8 +32,8 @@ export default {
 .custom-circle {
   position: relative;
   background-color: gray;
-  height: 6px;
-  width: 6px;
+  height: 5px;
+  width: 5px;
   border-radius: 50%;
 }
 
@@ -59,10 +59,10 @@ export default {
     opacity: 1;
   }
   100% {
-    top: -75px;
-    left: -75px;
-    width: 150px;
-    height: 150px;
+    top: -72px;
+    left: -72px;
+    width: 152px;
+    height: 152px;
     opacity: 0;
   }
 }

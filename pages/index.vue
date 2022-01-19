@@ -15,7 +15,7 @@ export default {
     Map,
   },
   mounted() {
-    this.selectCity(3)
+    this.selectCity(5)
   },
   methods: {
     ...mapActions(['selectCity']),
@@ -28,5 +28,6 @@ body,
 #app {
   width: 100%;
   height: 100%;
+  background-color: black;
 }
 </style>

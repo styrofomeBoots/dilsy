@@ -3,7 +3,7 @@ const SCALES = {
   pentatonic: ['G', 'A', 'C', 'D', 'E'],
 }
 
-const OCTAVES = [1, 2, 3, 4, 5, 6]
+const OCTAVES = [1, 2, 3, 4, 5]
 
 function getBounds(stations) {
   const bounds = { max: [], min: [] }
