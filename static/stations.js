@@ -57,6 +57,7 @@ export async function getUpdates(city, stations) {
           ? RETURN_MSG
           : CHECKOUT_MSG
       const update = {
+        isReturn: station.numBikesAvailable < status.num_bikes_available,
         lineOne: station.name,
         lineTwo: `${message}`,
         lineThree: `${status.num_bikes_available}/${station.capacity} bikes available`,

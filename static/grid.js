@@ -1,9 +1,9 @@
-const SCALES = {
+export const SCALES = {
   major: ['G', 'A', 'B', 'C', 'D', 'E', 'F'],
   pentatonic: ['G', 'A', 'C', 'D', 'E'],
 }
 
-const OCTAVES = [1, 2, 3, 4, 5]
+export const OCTAVES = [1, 2, 3, 4, 5]
 
 function getBounds(stations) {
   const bounds = { max: [], min: [] }
